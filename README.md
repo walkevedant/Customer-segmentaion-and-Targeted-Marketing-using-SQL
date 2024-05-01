@@ -1,1 +1,95 @@
 # Customer-segmentaion-and-Targeted-Marketing-using-SQL
+
+
+create database Customer_Seg_Proj;
+
+use Customer_Seg_Proj;
+
+create table Txn_table(
+Invoice_no int(7),
+Stock_code text,
+Description_Item text,
+Quantity int(7),
+Invoice_date timestamp,
+Unit_price decimal,
+Cust_ID int,
+Country text);
+
+show tables;
+
+create table invoice_bill as ( 
+SELECT Invoice_no, sum(Quantity*Unit_price) as bill FROM txn_table group by Invoice_no);
+
+create table cust_invoices as ( 
+SELECT Cust_ID, Invoice_no, min(date(Invoice_date)) as txn_date from txn_table group by Cust_ID,Invoice_no);
+
+create table RFM_data as (
+select cust_invoices.*, invoice_bill.bill from cust_invoices right join invoice_bill on cust_invoices.Invoice_no=invoice_bill.Invoice_no);
+
+with cte1 as (
+select Cust_ID, date(min(txn_date)) as first_purchase, date(max(txn_date)) as last_purchase, count(Invoice_no) as total_purchases, sum(bill) as monetary from RFM_data group by Cust_ID),
+
+cte2 as (
+select date(max(txn_date)) as ref_date from RFM_data),
+
+cte3 as (
+select * from cte1, cte2)
+select * from cte3;
+
+create table RFM_final as (
+select Cust_ID, datediff(ref_date,last_purchase)+1 as Recency, total_purchases/(datediff(last_purchase,first_purchase)+1) as Frequency, monetary from cte3 order by Cust_ID);
+
+select @r20 := Recency from RFM_final order by Recency limit 1 offset 863;
+select @r40 := Recency from RFM_final order by Recency limit 1 offset 1727;
+select @r60 := Recency from RFM_final order by Recency limit 1 offset 2591;
+select @r80 := Recency from RFM_final order by Recency limit 1 offset 3455;
+select @r100 := Recency from RFM_final order by Recency limit 1 offset 4319;
+
+select @f20 := Frequency from RFM_final order by Frequency limit 1 offset 863;
+select @f40 := Frequency from RFM_final order by Frequency limit 1 offset 1727;
+select @f60 := Frequency from RFM_final order by Frequency limit 1 offset 2591;
+select @f80 := Frequency from RFM_final order by Frequency limit 1 offset 3455;
+select @f100 := Frequency from RFM_final order by Frequency limit 1 offset 4319;
+
+select @m20 := monetary from RFM_final order by monetary limit 1 offset 863;
+select @m40 := monetary from RFM_final order by monetary limit 1 offset 1727;
+select @m60 := monetary from RFM_final order by monetary limit 1 offset 2591;
+select @m80 := monetary from RFM_final order by monetary limit 1 offset 3455;
+select @m100 := monetary from RFM_final order by monetary limit 1 offset 4319;
+
+create table rfm_score as ( SELECT Cust_ID, Recency, Frequency, monetary, 
+case when Recency<=@r20 then 5 
+when Recency>@r20 and Recency<=@r40 then 4 
+when Recency>@r40 and Recency<=@r60 then 3 
+when Recency>@r60 and Recency<=@r80 then 2 
+when Recency>@r80 and Recency<=@r100 then 1 end as RScore, 
+
+case when Frequency<=@f20 then 1 
+when Frequency>@f20 and Frequency<=@f40 then 2 
+when Frequency>@f40 and Frequency<=@f60 then 3 
+when Frequency>@f60 and Frequency<=@f80 then 4 
+when Frequency>@f80 and Frequency<=@f100 then 5 end as FScore, 
+
+case when monetary<=@m20 then 1 
+when monetary>@m20 and monetary<=@m40 then 2 
+when monetary>@m40 and monetary<=@m60 then 3 
+when monetary>@m60 and monetary<=@m80 then 4 
+when monetary>@m80 and monetary<=@m100 then 5 end as MScore FROM RFM_final);
+select * from rfm_score;
+
+create table final_scores_data as (
+select Cust_ID, Recency, Frequency, monetary, RScore, round((FScore+MScore)/2) as FM_score from rfm_score);
+
+create table output_score_segmentation as (SELECT Cust_ID, Recency, Frequency, monetary, RScore, FM_score, 
+CASE WHEN (RScore = 5 AND FM_score = 5) OR (RScore = 5 AND FM_score = 4) OR (RScore = 4 AND FM_score = 5) THEN 'Champions' 
+WHEN (RScore = 5 AND FM_score =3) OR (RScore = 4 AND FM_score = 4) OR (RScore = 3 AND FM_score = 5) OR (RScore = 3 AND FM_score = 4) THEN 'Loyal Customers' 
+WHEN (RScore = 5 AND FM_score = 2) OR (RScore = 4 AND FM_score = 2) OR (RScore = 3 AND FM_score = 3) OR (RScore = 4 AND FM_score = 3) THEN 'Potential Loyalists' 
+WHEN RScore = 5 AND FM_score = 1 THEN 'Recent Customers' WHEN (RScore = 4 AND FM_score = 1) OR (RScore = 3 AND FM_score = 1) THEN 'Promising' 
+WHEN (RScore = 3 AND FM_score = 2) OR (RScore = 2 AND FM_score = 3) OR (RScore = 2 AND FM_score = 2) THEN 'Customers Needing Attention' 
+WHEN RScore = 2 AND FM_score = 1 THEN 'About to Sleep' 
+WHEN (RScore = 2 AND FM_score = 5) OR (RScore = 2 AND FM_score = 4) OR (RScore = 1 AND FM_score = 3) THEN 'At Risk' 
+WHEN (RScore = 1 AND FM_score = 5) OR (RScore = 1 AND FM_score = 4) THEN 'Cant Lose Them' 
+WHEN RScore = 1 AND FM_score = 2 THEN 'Hibernating' 
+WHEN RScore = 1 AND FM_score = 1 THEN 'Lost' END AS rfm_segment FROM final_scores_data);
+
+select * from output_score_segmentation;
