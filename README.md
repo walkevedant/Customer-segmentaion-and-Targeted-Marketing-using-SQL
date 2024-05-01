@@ -1,4 +1,4 @@
-# Customer-segmentaion-and-Targeted-Marketing-using-SQL
+# Customer segmentaion and Targeted Marketing using SQL
 
 
 
