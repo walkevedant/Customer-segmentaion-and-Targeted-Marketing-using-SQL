@@ -16,27 +16,27 @@ Objective: Developed a customer segmentation strategy to help a retail store opt
 
 Steps Taken:
 
-Created a new MySQL database and imported transaction data into a table.
+- Created a new MySQL database and imported transaction data into a table.
 
-Calculated bill amount for each invoice to understand the monetary value of each transaction.
+- Calculated bill amount for each invoice to understand the monetary value of each transaction.
 
-Aggregated customer details, including recency, frequency, and monetary values.
+- Aggregated customer details, including recency, frequency, and monetary values.
 
-Performed RFM analysis to calculate recency, frequency, and monetary scores for each customer.
+- Performed RFM analysis to calculate recency, frequency, and monetary scores for each customer.
 
-Divided recency, frequency, and monetary values into 5 quantiles for segmentation.
+- Divided recency, frequency, and monetary values into 5 quantiles for segmentation.
 
-Calculated RFM scores for customers based on quantiles, with recency scoring on a 1-5 scale, frequency and monetary combined into a single score.
+- Calculated RFM scores for customers based on quantiles, with recency scoring on a 1-5 scale, frequency and monetary combined into a single score.
 
-Segmented customers into 11 groups (e.g., Champions, Loyal Customers, Recent Customers) based on RFM scores and provided actionable insights for each segment.
+- Segmented customers into 11 groups (e.g., Champions, Loyal Customers, Recent Customers) based on RFM scores and provided actionable insights for each segment.
 
 Results:
 
-Identified key customer segments for targeted marketing efforts.
+- Identified key customer segments for targeted marketing efforts.
 
-Provided strategic recommendations for engaging with each customer segment.
+- Provided strategic recommendations for engaging with each customer segment.
 
-Improved the retail store's ability to focus on high-value customers and reactivate at-risk customers.
+- Improved the retail store's ability to focus on high-value customers and reactivate at-risk customers.
 
 
 
