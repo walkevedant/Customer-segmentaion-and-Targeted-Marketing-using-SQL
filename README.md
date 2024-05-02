@@ -1,4 +1,4 @@
-# Customer segmentaion and Targeted Marketing using SQL
+# Customer segmentation and Targeted Marketing using SQL
 
 Problem Statement:
 
